@@ -1,0 +1,218 @@
+一、LangChain 概述
+1.1 什么是 LangChain
+开源 LLM 应用开发框架
+核心理念：可组合的构建块
+LangChain 在 AI 应用开发中的定位
+1.2 LangChain 的发展历程
+2022.10 Harrison Chase 创建
+2024.02 获得 Sequoia 领投的 $25M A 轮融资
+LangChain v0.1 → v0.2 → v0.3 的演进
+从 Chain 范式到 LCEL 再到 LangGraph 的架构演进
+1.3 LangChain 生态系统全景
+langchain-core：核心抽象与接口
+langchain：高级组件与链
+langchain-community：社区集成
+LangGraph：图状态机编排（独立框架）
+LangServe：部署为 REST API
+LangSmith：可观测性与评估平台
+LangGraph Platform：Agent 部署基础设施
+1.4 LangChain 的核心设计哲学
+模块化与可组合性
+模型无关（支持多种 LLM 提供商）
+标准化接口（Runnable 协议）
+渐进式复杂度（简单到复杂的平滑过渡）
+
+二、核心抽象与接口
+2.1 Runnable 协议
+统一的组件接口
+核心方法：invoke / batch / stream / ainvoke / abatch / astream
+输入输出类型系统
+Runnable 的组合与链接
+2.2 Chat Models
+ChatModel 接口
+消息类型（SystemMessage / HumanMessage / AIMessage / ToolMessage）
+模型配置（temperature / max_tokens / top_p）
+流式输出（Streaming）
+结构化输出（Structured Output / with_structured_output）
+2.3 Prompt Templates
+PromptTemplate（字符串模板）
+ChatPromptTemplate（消息模板）
+MessagesPlaceholder（动态消息占位）
+FewShotPromptTemplate（少样本模板）
+Prompt 的组合与复用
+2.4 Output Parsers
+StrOutputParser
+JsonOutputParser
+PydanticOutputParser
+自定义 Output Parser
+2.5 Document & Document Loaders
+Document 数据模型（page_content + metadata）
+文档加载器分类
+(1) 文件加载器（PDF / Word / CSV / HTML）
+(2) Web 加载器（URL / Sitemap）
+(3) 数据库加载器
+(4) API 加载器
+2.6 Text Splitters
+RecursiveCharacterTextSplitter
+TokenTextSplitter
+MarkdownHeaderTextSplitter
+语义分块（SemanticChunker）
+分块参数（chunk_size / chunk_overlap）
+
+三、LCEL（LangChain Expression Language）
+3.1 LCEL 的核心概念
+声明式链组合语法
+管道操作符（|）
+Runnable 的链式调用
+3.2 基本链构建
+Prompt | Model | OutputParser 模式
+链的输入输出类型推断
+链的可视化
+3.3 高级链模式
+RunnableParallel（并行执行）
+RunnablePassthrough（透传）
+RunnableLambda（自定义函数）
+RunnableBranch（条件分支）
+RunnableWithMessageHistory（带历史记忆）
+3.4 LCEL 的执行特性
+自动流式支持
+自动批处理支持
+自动异步支持
+自动重试与回退（with_retry / with_fallbacks）
+3.5 LCEL vs 传统 Chain
+LCEL 的优势（统一接口、流式、类型安全）
+何时使用 LCEL vs 何时使用 LangGraph
+
+四、工具与工具调用（Tool Calling）
+4.1 工具定义
+@tool 装饰器
+StructuredTool 类
+BaseTool 基类
+工具的 name / description / args_schema
+4.2 工具绑定
+model.bind_tools(tools)
+工具调用的消息流
+ToolMessage 的处理
+4.3 内置工具集
+搜索工具（Tavily / Brave / Google）
+代码执行工具（Python REPL）
+数学计算工具
+文件操作工具
+4.4 自定义工具开发
+同步工具 vs 异步工具
+工具的错误处理
+工具的输入验证
+4.5 MCP 工具集成
+LangChain MCP Adapters
+MCP Server 作为 LangChain 工具
+配置与连接管理
+
+五、检索与 RAG
+5.1 Embedding Models
+OpenAIEmbeddings
+HuggingFaceEmbeddings
+自定义 Embedding 模型
+5.2 Vector Stores
+Chroma / FAISS / Pinecone / Qdrant / Milvus
+VectorStore 统一接口
+相似度搜索（similarity_search）
+带元数据过滤的搜索
+5.3 Retrievers
+VectorStoreRetriever
+MultiQueryRetriever
+SelfQueryRetriever
+ParentDocumentRetriever
+EnsembleRetriever
+ContextualCompressionRetriever
+5.4 RAG Chain 构建
+基础 RAG Chain（检索 + 生成）
+带历史的 RAG Chain
+多步 RAG Chain
+RAG 评估与优化
+
+六、记忆（Memory）
+6.1 对话记忆
+ConversationBufferMemory
+ConversationBufferWindowMemory
+ConversationSummaryMemory
+ConversationSummaryBufferMemory
+6.2 向量存储记忆
+VectorStoreRetrieverMemory
+长期记忆的实现
+6.3 RunnableWithMessageHistory
+基于 Runnable 的记忆管理
+ChatMessageHistory 接口
+持久化存储后端（Redis / PostgreSQL / MongoDB）
+6.4 LangMem SDK
+管理记忆（Manage Memory）
+提取记忆（Extract Memory）
+搜索记忆（Search Memory）
+与 LangGraph 的集成
+
+七、Agent
+7.1 Agent 的核心概念
+Agent = LLM + Tools + Loop
+Agent 的决策循环
+7.2 预构建 Agent
+create_react_agent（ReAct 模式）
+create_tool_calling_agent（工具调用模式）
+create_structured_chat_agent
+create_openai_functions_agent
+7.3 AgentExecutor
+Agent 的执行引擎
+最大迭代次数控制
+错误处理与回退
+7.4 Agent 的演进
+传统 Agent → LCEL Agent → LangGraph Agent
+LangGraph 作为 Agent 的推荐实现方式
+何时使用 AgentExecutor vs LangGraph
+
+八、回调与可观测性
+8.1 回调系统
+CallbackHandler 接口
+常用回调事件（on_llm_start / on_tool_start / on_chain_end 等）
+自定义回调处理器
+8.2 LangSmith 集成
+追踪（Tracing）
+评估（Evaluation）
+数据集管理
+Prompt 管理
+8.3 其他可观测性集成
+Langfuse
+Phoenix (Arize)
+OpenTelemetry
+
+九、集成生态
+9.1 模型提供商集成
+langchain-openai
+langchain-anthropic
+langchain-google-genai
+langchain-aws（Bedrock）
+langchain-community（社区模型）
+9.2 向量数据库集成
+langchain-chroma
+langchain-pinecone
+langchain-qdrant
+langchain-milvus
+9.3 工具与服务集成
+langchain-community tools
+MCP 集成
+自定义集成开发
+9.4 部署
+LangServe（FastAPI 部署）
+LangGraph Platform
+Docker 容器化
+云平台部署（AWS / GCP / Azure）
+
+十、最佳实践与注意事项
+从简单 Chain 开始，按需增加复杂度
+复杂 Agent 逻辑优先使用 LangGraph
+善用 LangSmith 进行调试和评估
+注意版本兼容性（v0.2 → v0.3 的迁移）
+合理选择集成包（langchain-xxx vs langchain-community）
+常见错误
+1. 过度使用 Chain 导致调试困难
+2. 忽视流式输出导致用户体验差
+3. 记忆管理不当导致上下文溢出
+4. 工具描述不清导致 Agent 误用
+5. 未使用 LangSmith 导致问题难以定位

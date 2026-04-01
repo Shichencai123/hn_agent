@@ -1,0 +1,270 @@
+一、Transformer 架构基础
+1.1 Transformer 的诞生背景
+RNN / LSTM 的局限性（顺序计算、长距离依赖衰减、梯度消失）
+"Attention Is All You Need"（2017, Vaswani et al.）
+完全基于注意力机制，抛弃循环和卷积
+1.2 Transformer 整体架构
+Encoder-Decoder 结构
+输入嵌入（Input Embedding）
+位置编码（Positional Encoding）
+多头注意力（Multi-Head Attention）
+前馈网络（Feed-Forward Network）
+残差连接（Residual Connection）
+层归一化（Layer Normalization）
+1.3 自注意力机制（Self-Attention）
+Query / Key / Value 的含义与计算
+注意力分数计算：Attention(Q,K,V) = softmax(QK^T / √d_k) V
+缩放因子 √d_k 的作用（防止点积过大导致 softmax 梯度消失）
+注意力权重的可解释性
+自注意力的时间复杂度 O(n²d)
+1.4 多头注意力（Multi-Head Attention）
+多头的动机（捕获不同子空间的注意力模式）
+头的数量与维度的关系（d_model = n_heads × d_head）
+多头的拼接与线性投影
+不同头学到的模式差异
+1.5 位置编码（Positional Encoding）
+为什么需要位置编码（Transformer 无序列归纳偏置）
+正弦/余弦位置编码（原始 Transformer）
+可学习位置编码（Learned Positional Embedding）
+旋转位置编码 RoPE（LLaMA 系列）
+ALiBi（Attention with Linear Biases）
+各编码方式的对比与适用场景
+1.6 前馈网络（FFN）
+两层线性变换 + 激活函数
+FFN 的作用（非线性变换、知识存储）
+隐藏层维度通常为 4 × d_model
+激活函数演进：ReLU → GELU → SwiGLU
+1.7 残差连接与层归一化
+残差连接的作用（梯度流动、训练稳定性）
+Post-Norm vs Pre-Norm
+(1) Post-Norm：原始 Transformer（先子层再归一化）
+(2) Pre-Norm：现代 LLM 主流（先归一化再子层，训练更稳定）
+RMSNorm vs LayerNorm（RMSNorm 更高效，LLaMA 采用）
+
+二、Transformer 架构变体
+2.1 Encoder-Only 架构（BERT 系列）
+双向注意力（Bidirectional Attention）
+预训练任务：MLM（Masked Language Modeling）+ NSP
+适用场景：文本分类、NER、语义理解
+代表模型：BERT、RoBERTa、ALBERT、DeBERTa
+2.2 Decoder-Only 架构（GPT 系列）
+因果注意力掩码（Causal Attention Mask）
+自回归生成（Autoregressive Generation）
+预训练任务：Next Token Prediction
+为什么 Decoder-Only 成为 LLM 主流
+代表模型：GPT 系列、LLaMA、Qwen、Mistral、DeepSeek
+2.3 Encoder-Decoder 架构（T5 / BART）
+编码器处理输入，解码器生成输出
+交叉注意力（Cross-Attention）
+适用场景：翻译、摘要、问答
+代表模型：T5、BART、Flan-T5
+2.4 三种架构的对比
+理解任务 vs 生成任务 vs 序列到序列任务
+参数效率与扩展性
+为什么 Decoder-Only 在大规模下胜出
+
+三、现代 LLM 架构演进
+3.1 注意力机制优化
+1. Multi-Head Attention（MHA）→ 标准多头
+2. Multi-Query Attention（MQA）→ 所有头共享 KV
+3. Grouped-Query Attention（GQA）→ 分组共享 KV（LLaMA 2/3 采用）
+GQA 的优势：推理效率 vs 质量的平衡
+3.2 KV Cache
+KV Cache 的原理（缓存已计算的 Key/Value，避免重复计算）
+KV Cache 的内存开销（随序列长度线性增长）
+KV Cache 压缩技术
+(1) 量化 KV Cache
+(2) 稀疏 KV Cache
+(3) 滑动窗口 KV Cache
+3.3 Flash Attention
+标准 Attention 的内存瓶颈（O(n²) 中间矩阵）
+Flash Attention 的核心思想（分块计算 + IO 感知）
+Flash Attention v1 → v2 → v3 的演进
+对训练和推理速度的提升
+3.4 长上下文扩展
+RoPE 的外推能力
+NTK-Aware Scaling
+YaRN（Yet another RoPE extensioN）
+动态 NTK
+从 4K → 32K → 128K → 1M 的上下文扩展历程
+3.5 混合专家模型（Mixture of Experts, MoE）
+MoE 的核心思想（稀疏激活，每次只用部分参数）
+门控网络（Gating Network / Router）
+Top-K 路由策略
+负载均衡问题与解决方案
+MoE 的优势：更大模型容量，更低推理成本
+代表模型：Mixtral、DeepSeek-V2/V3、GPT-4（传闻）
+3.6 现代 LLM 架构对比
+GPT-4o / Claude / Gemini / LLaMA 3 / Qwen 2.5 / DeepSeek-V3
+关键架构选择对比（位置编码、注意力类型、归一化、激活函数、MoE）
+
+四、Tokenization（分词）
+4.1 为什么需要 Tokenization
+文本 → Token 序列 → 模型输入
+Token 是 LLM 处理的最小单位
+4.2 主流分词算法
+BPE（Byte Pair Encoding）—— GPT 系列
+WordPiece —— BERT
+SentencePiece / Unigram —— LLaMA、T5
+Byte-level BPE —— GPT-2+
+4.3 词表大小的影响
+词表大小 vs 序列长度 vs 模型性能
+中文分词的特殊挑战
+多语言词表设计
+4.4 特殊 Token
+[CLS] / [SEP] / [PAD] / [MASK]
+<|endoftext|> / <|im_start|> / <|im_end|>
+工具调用相关的特殊 Token
+
+五、预训练（Pre-training）
+5.1 预训练目标
+Next Token Prediction（自回归，Decoder-Only）
+Masked Language Modeling（双向，Encoder-Only）
+Span Corruption（T5 风格）
+5.2 预训练数据
+数据来源（Web 爬取、书籍、代码、学术论文）
+数据清洗与去重
+数据质量 vs 数据数量
+数据配比（不同领域的混合比例）
+5.3 Scaling Laws（缩放定律）
+Kaplan Scaling Laws（OpenAI, 2020）
+Chinchilla Scaling Laws（DeepMind, 2022）
+模型大小 vs 数据量 vs 计算量的最优配比
+Compute-Optimal Training
+5.4 训练技术
+混合精度训练（FP16 / BF16）
+梯度累积
+学习率调度（Warmup + Cosine Decay）
+并行训练策略
+(1) 数据并行（Data Parallelism）
+(2) 张量并行（Tensor Parallelism）
+(3) 流水线并行（Pipeline Parallelism）
+(4) ZeRO 优化（DeepSpeed）
+(5) FSDP（Fully Sharded Data Parallelism）
+
+六、对齐与微调（Alignment & Fine-tuning）
+6.1 监督微调（SFT, Supervised Fine-Tuning）
+指令微调（Instruction Tuning）
+对话格式训练
+SFT 数据的质量要求
+6.2 RLHF（Reinforcement Learning from Human Feedback）
+奖励模型训练（Reward Model）
+PPO（Proximal Policy Optimization）算法
+RLHF 的流程：SFT → RM → PPO
+RLHF 的局限性（奖励 hacking、训练不稳定）
+6.3 DPO（Direct Preference Optimization）
+绕过奖励模型，直接从偏好数据优化
+DPO vs RLHF 的对比
+DPO 的优势（更简单、更稳定）
+6.4 其他对齐方法
+RLAIF（AI 反馈的强化学习）
+Constitutional AI（Anthropic）
+GRPO（Group Relative Policy Optimization, DeepSeek）
+6.5 参数高效微调（PEFT）
+LoRA（Low-Rank Adaptation）
+QLoRA（量化 + LoRA）
+Adapter Tuning
+Prefix Tuning
+P-Tuning
+各方法的对比与选型
+
+七、推理与解码（Inference & Decoding）
+7.1 自回归生成过程
+Prefill 阶段（处理输入 Prompt）
+Decode 阶段（逐 Token 生成）
+KV Cache 在推理中的作用
+7.2 解码策略
+贪心解码（Greedy Decoding）
+Beam Search
+采样（Sampling）
+(1) Temperature 控制
+(2) Top-K 采样
+(3) Top-P（Nucleus）采样
+(4) Min-P 采样
+重复惩罚（Repetition Penalty）
+各策略的适用场景
+7.3 推理优化技术
+KV Cache 优化（量化、稀疏、分页）
+Flash Attention / Flash Decoding
+推测解码（Speculative Decoding）
+连续批处理（Continuous Batching）
+分页注意力（Paged Attention / vLLM）
+7.4 模型压缩
+量化（Quantization）
+(1) INT8 / INT4 / GPTQ / AWQ / GGUF
+(2) 训练后量化 vs 量化感知训练
+知识蒸馏（Knowledge Distillation）
+模型剪枝（Pruning）
+7.5 推理框架
+vLLM（高吞吐推理）
+TensorRT-LLM（NVIDIA 优化）
+llama.cpp（CPU/边缘推理）
+Ollama（本地部署）
+SGLang（结构化生成）
+
+八、涌现能力与推理能力
+8.1 涌现能力（Emergent Abilities）
+什么是涌现能力（规模达到阈值后突然出现的能力）
+典型涌现能力：上下文学习、思维链推理、指令遵循
+涌现能力的争议（是否真的"涌现"）
+8.2 上下文学习（In-Context Learning, ICL）
+Zero-shot / Few-shot / Many-shot
+ICL 的工作原理（隐式贝叶斯推断假说）
+ICL 的局限性
+8.3 思维链推理（Chain-of-Thought, CoT）
+标准 CoT
+Zero-shot CoT（"Let's think step by step"）
+Self-Consistency CoT
+Tree-of-Thought / Graph-of-Thought
+8.4 推理时计算（Test-Time Compute）
+推理时计算缩放定律
+更多推理时间 → 更好的结果
+o1 / o3 / DeepSeek-R1 的推理模式
+思考 Token（Thinking Tokens）
+
+九、多模态大模型
+9.1 视觉-语言模型（VLM）
+图像编码器 + LLM 的融合架构
+CLIP / SigLIP 视觉编码器
+视觉 Token 的注入方式
+代表模型：GPT-4o、Claude 3.5、Gemini、LLaVA、Qwen-VL
+9.2 语音-语言模型
+语音编码器 + LLM
+语音理解与语音生成
+代表模型：GPT-4o（语音）、Whisper
+9.3 统一多模态架构
+文本 + 图像 + 音频 + 视频的统一处理
+Any-to-Any 模型
+代表模型：Gemini、GPT-4o
+
+十、LLM 的关键参数与配置
+10.1 模型参数
+模型大小（参数量：7B / 13B / 70B / 405B）
+层数（num_layers）
+隐藏维度（hidden_size）
+注意力头数（num_attention_heads）
+词表大小（vocab_size）
+10.2 生成参数
+temperature（控制随机性）
+top_p / top_k（控制采样范围）
+max_tokens（最大生成长度）
+stop sequences（停止序列）
+frequency_penalty / presence_penalty
+10.3 上下文窗口
+上下文长度的演进（2K → 4K → 32K → 128K → 1M）
+有效上下文长度 vs 标称上下文长度
+长上下文的性能衰减（Lost in the Middle）
+
+十一、面试高频问题索引
+Transformer 为什么用缩放点积注意力而非加性注意力？
+为什么 Decoder-Only 架构成为 LLM 主流？
+RoPE 相比正弦位置编码的优势是什么？
+GQA 相比 MHA 和 MQA 的权衡是什么？
+Flash Attention 的核心优化思路是什么？
+Scaling Laws 对模型训练的指导意义？
+RLHF 和 DPO 的核心区别？
+LoRA 的原理及为什么有效？
+KV Cache 的内存开销如何计算？
+推测解码（Speculative Decoding）的原理？
+MoE 的路由机制和负载均衡问题？
+Temperature 和 Top-P 如何影响生成质量？

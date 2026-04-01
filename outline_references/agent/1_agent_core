@@ -1,0 +1,131 @@
+一、Agent 核心概念
+1.1 什么是 LLM Agent
+Agent 与传统 LLM 调用的区别
+Agent 的核心特征：自主性、目标导向、环境交互
+Agent 的基本运行循环：感知 → 推理 → 行动 → 观察
+1.2 Agent 的核心组件
+1. LLM（大脑）
+(1) 模型选择（推理能力 vs 成本 vs 延迟）
+(2) 上下文窗口管理
+(3) 结构化输出（JSON / Function Calling）
+2. 规划（Planning）
+(1) 任务分解（Task Decomposition）
+(2) 子目标生成
+(3) 计划调整与重规划
+3. 记忆（Memory）
+(1) 短期记忆（对话上下文 / 工作记忆）
+(2) 长期记忆（向量存储 / 知识库）
+(3) 情景记忆（历史经验检索）
+4. 工具使用（Tool Use）
+(1) 工具定义与注册
+(2) 工具选择与调用
+(3) 工具结果解析
+5. 环境感知与反馈
+(1) 外部环境状态获取
+(2) 执行结果观察
+(3) 错误检测与恢复
+1.3 Agent 的类型分类
+反应式 Agent（Reactive Agent）
+审慎式 Agent（Deliberative Agent）
+混合式 Agent（Hybrid Agent）
+
+二、推理与规划模式
+2.1 ReAct（Reasoning + Acting）
+ReAct 的核心思想
+Thought → Action → Observation 循环
+ReAct 的优势与局限
+2.2 Chain-of-Thought（CoT）推理
+标准 CoT
+自洽性 CoT（Self-Consistency CoT）
+Tree-of-Thought（ToT）
+2.3 计划-执行模式（Plan-and-Execute）
+先规划后执行的流程
+动态重规划机制
+Plan-and-Solve 策略
+2.4 反思机制（Reflection）
+自我批评（Self-Critique）
+Reflexion 框架
+经验总结与学习
+2.5 推理模式选择指南
+简单任务 vs 复杂任务
+单步 vs 多步推理
+确定性 vs 探索性任务
+
+三、记忆系统设计
+3.1 记忆的核心目标
+上下文持续性
+经验复用
+知识积累
+3.2 短期记忆（Working Memory）
+对话历史管理
+滑动窗口策略
+摘要压缩策略
+Token 预算管理
+3.3 长期记忆（Long-term Memory）
+向量数据库存储
+结构化知识存储
+记忆检索策略（相似度 / 时间衰减 / 重要性）
+3.4 情景记忆（Episodic Memory）
+任务执行轨迹记录
+成功/失败经验存储
+经验检索与复用
+3.5 记忆管理策略
+记忆写入时机
+记忆淘汰与遗忘
+记忆一致性维护
+
+四、工具使用与集成
+4.1 工具系统的核心设计
+工具描述规范（名称、参数、返回值）
+工具注册与发现机制
+工具权限与安全控制
+4.2 Function Calling 机制
+OpenAI Function Calling
+Anthropic Tool Use
+开源模型工具调用
+4.3 常见工具类型
+1. 信息检索工具（搜索引擎、知识库查询）
+2. 代码执行工具（Python 解释器、沙箱）
+3. API 调用工具（外部服务集成）
+4. 文件操作工具（读写、解析）
+5. 数据库工具（查询、写入）
+4.4 MCP（Model Context Protocol）
+MCP 协议概述
+MCP Server 与 Client
+MCP 在工具集成中的作用
+4.5 工具调用的错误处理
+参数校验与修正
+调用失败重试策略
+降级与兜底方案
+
+五、控制循环与执行引擎
+5.1 Agent Loop 设计
+基本循环结构
+最大迭代次数控制
+终止条件设计
+5.2 状态管理
+Agent 状态机设计
+状态持久化
+检查点与恢复
+5.3 错误处理与容错
+异常捕获与分类
+自动重试策略
+人工介入（Human-in-the-Loop）
+5.4 可观测性
+日志记录
+执行轨迹追踪（Tracing）
+性能指标监控
+
+六、单 Agent 框架与工具
+6.1 LangChain Agents
+6.2 LlamaIndex Agents
+6.3 OpenAI Agents SDK
+6.4 Anthropic Claude Tool Use
+6.5 框架对比与选型建议
+
+七、最佳实践与注意事项
+Prompt 工程对 Agent 性能的影响
+工具描述的清晰度与粒度
+记忆系统的成本与效果平衡
+安全性与权限控制
+常见失败模式与应对策略

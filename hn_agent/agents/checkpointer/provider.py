@@ -31,11 +31,19 @@ class SQLiteCheckpointer(BaseCheckpointSaver):
     """
 
     def __init__(self, db_path: str = "./data/checkpoints.db") -> None:
-        super().__init__()
         self._db_path = db_path
-        self._conn = sqlite3.connect(db_path, check_same_thread=False)
-        self._saver = SqliteSaver(self._conn)
-        self._saver.setup()
+        self._conn = None
+        self._saver = None
+        try:
+            super().__init__()
+            import os
+            os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+            self._conn = sqlite3.connect(db_path, check_same_thread=False)
+            self._saver = SqliteSaver(self._conn)
+            self._saver.setup()
+        except Exception:
+            logger.exception("SQLiteCheckpointer 初始化失败: %s", db_path)
+            raise
 
     @property
     def db_path(self) -> str:
@@ -105,10 +113,11 @@ class SQLiteCheckpointer(BaseCheckpointSaver):
 
     def close(self) -> None:
         """关闭数据库连接。"""
-        try:
-            self._conn.close()
-        except Exception:
-            logger.exception("关闭检查点数据库连接失败")
+        if self._conn is not None:
+            try:
+                self._conn.close()
+            except Exception:
+                logger.exception("关闭检查点数据库连接失败")
 
     def __del__(self) -> None:
         try:

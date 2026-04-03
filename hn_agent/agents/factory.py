@@ -80,9 +80,21 @@ async def make_lead_agent(agent_config: AgentConfig) -> CompiledStateGraph:
     # 1. 加载应用配置
     loader = ConfigLoader()
     try:
-        app_config = loader.load_from_dict({})
+        # 优先从配置文件加载，支持环境变量覆盖
+        import os
+        config_path = os.environ.get("HN_AGENT_CONFIG", "config/config.yaml")
+        # 也尝试相对于项目根目录的路径
+        if not os.path.exists(config_path):
+            project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            config_path = os.path.join(project_root, "config", "config.yaml")
+        if os.path.exists(config_path):
+            logger.info("从配置文件加载: %s", config_path)
+            app_config = loader.load(config_path)
+        else:
+            logger.warning("配置文件不存在: %s，使用默认配置 + 环境变量", config_path)
+            app_config = loader.load_from_dict({})
     except Exception:
-        logger.warning("无法加载应用配置，使用默认配置")
+        logger.warning("无法加载应用配置，使用默认配置", exc_info=True)
         from hn_agent.config.models import AppConfig
         app_config = AppConfig()
 
@@ -162,12 +174,17 @@ def _load_skills(skill_names: list[str]) -> list:
 def _create_checkpointer():
     """创建检查点 Provider。
 
+    在异步上下文中使用 AsyncSQLiteCheckpointer，
+    确保与 LangGraph 的异步流式推理兼容。
+
     Returns:
-        SQLiteCheckpointer 实例，失败时返回 None。
+        AsyncSQLiteCheckpointer 实例，失败时返回 None。
     """
     try:
-        from hn_agent.agents.checkpointer import SQLiteCheckpointer
-        return SQLiteCheckpointer()
+        import os
+        os.makedirs("./data", exist_ok=True)
+        from hn_agent.agents.checkpointer import AsyncSQLiteCheckpointer
+        return AsyncSQLiteCheckpointer()
     except Exception:
         logger.warning("检查点系统不可用，Agent 状态不会持久化")
         return None
